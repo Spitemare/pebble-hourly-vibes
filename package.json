@@ -1,0 +1,33 @@
+{
+  "name": "pebble-hourly-vibes",
+  "description": "Vibe every hour, on the hour",
+  "author": "David Morgan",
+  "license": "ISC",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Spitemare/pebble-hourly-vibes.git"
+  },
+  "files": [
+    "dist.zip"
+  ],
+  "keywords": [
+    "pebble-package"
+  ],
+  "dependencies": {
+    "pebble-events": "^1.1.0"
+  },
+  "pebble": {
+    "projectType": "package",
+    "sdkVersion": "3",
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite"
+    ],
+    "resources": {
+      "media": []
+    }
+  }
+}
