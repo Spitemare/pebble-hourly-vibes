@@ -9,7 +9,7 @@ static EventHandle s_health_event_handle;
 static uint32_t *s_segments;
 static uint32_t s_num_segments;
 
-bool s_enabled;
+bool s_enabled = true;
 static EventHandle s_tick_timer_event_handle;
 
 static void prv_vibe(void) {
