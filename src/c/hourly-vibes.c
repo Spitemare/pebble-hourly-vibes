@@ -3,13 +3,14 @@
 #include "hourly-vibes.h"
 
 #ifdef PBL_HEALTH
+static bool s_sleeping;
 static EventHandle s_health_event_handle;
 #endif
 
 static uint32_t *s_segments;
 static uint32_t s_num_segments;
 
-bool s_enabled = true;
+static bool s_enabled = true;
 static EventHandle s_tick_timer_event_handle;
 
 static void prv_vibe(void) {
@@ -32,13 +33,13 @@ static void prv_tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 static void prv_health_event_handler(HealthEventType event, void *context) {
     if (event == HealthEventSignificantUpdate) {
         prv_health_event_handler(HealthEventSleepUpdate, context);
-    } else if (event == HealthEventSleepUpdate) {
+    } else if (event == HealthEventSleepUpdate || (event == HealthEventMovementUpdate && s_sleeping)) {
         HealthActivityMask mask = health_service_peek_current_activities();
-        bool sleeping = (mask & HealthActivitySleep) || (mask & HealthActivityRestfulSleep);
-        if (sleeping && s_tick_timer_event_handle != NULL) {
+        s_sleeping = (mask & HealthActivitySleep) || (mask & HealthActivityRestfulSleep);
+        if (s_sleeping && s_tick_timer_event_handle != NULL) {
             events_tick_timer_service_unsubscribe(s_tick_timer_event_handle);
             s_tick_timer_event_handle = NULL;
-        } else if (!sleeping && s_tick_timer_event_handle == NULL) {
+        } else if (!s_sleeping && s_tick_timer_event_handle == NULL) {
             s_tick_timer_event_handle = events_tick_timer_service_subscribe(HOUR_UNIT, prv_tick_handler);
         }
     }
