@@ -14,6 +14,8 @@ static bool s_enabled = true;
 static EventHandle s_tick_timer_event_handle;
 
 static void prv_vibe(void) {
+    if (quiet_time_is_active()) return;
+
     if (s_segments != NULL) {
         VibePattern pattern = {
             .durations = s_segments,
@@ -26,6 +28,10 @@ static void prv_vibe(void) {
 }
 
 static void prv_tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+#ifdef PBL_HEALTH
+    if (s_sleeping) return;
+#endif
+
     if (s_enabled && (units_changed & HOUR_UNIT) != 0) prv_vibe();
 }
 
@@ -36,12 +42,6 @@ static void prv_health_event_handler(HealthEventType event, void *context) {
     } else if (event == HealthEventSleepUpdate || (event == HealthEventMovementUpdate && s_sleeping)) {
         HealthActivityMask mask = health_service_peek_current_activities();
         s_sleeping = (mask & HealthActivitySleep) || (mask & HealthActivityRestfulSleep);
-        if (s_sleeping && s_tick_timer_event_handle != NULL) {
-            events_tick_timer_service_unsubscribe(s_tick_timer_event_handle);
-            s_tick_timer_event_handle = NULL;
-        } else if (!s_sleeping && s_tick_timer_event_handle == NULL) {
-            s_tick_timer_event_handle = events_tick_timer_service_subscribe(HOUR_UNIT, prv_tick_handler);
-        }
     }
 }
 #endif
